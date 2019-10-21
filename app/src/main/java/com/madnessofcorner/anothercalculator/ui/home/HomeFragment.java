@@ -1,6 +1,8 @@
 package com.madnessofcorner.anothercalculator.ui.home;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 							 ViewGroup container, Bundle savedInstanceState) {
 		View root = inflater.inflate(R.layout.fragment_home, container, false);
 		etWorkSpace = root.findViewById(R.id.et_workspace);
+		etWorkSpace.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable editable) {
+				doCalculate(etWorkSpace.getText().toString());
+			}
+		});
 		etResult = root.findViewById(R.id.et_result);
 
 		btn0 = root.findViewById(R.id.button0);
@@ -203,13 +220,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 			return "Operation = " + this.op + " Value = " + this.value;
 		}
 	}
-	private String doCalculate(String str) {
-		if (str.contains("+")) {
-			//first do priority operation
-			String[] test = str.split("\\+");
-			Log.d(TAG, "tes = " + Arrays.toString(test));
-		}
-		if (str.contains("*")) {
+	private void doCalculate(String str) {
+		if (historyOperation.size() == 0) {
+			etResult.setText(str);
+			return;
 		}
 
 		Float buffer = 0.0f;
@@ -251,7 +265,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		}
 
 		etResult.setText("" + buffer);
-		return "";
 	}
 
 	private void doFillHistoryOperation(final String str) {
@@ -261,10 +274,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 				lastOpertion,
 				str.contains(" ") ? str.substring(str.lastIndexOf(" "), str.length()) : str
 		);
-		historyOperation.add(new OperationWrapper(
-			lastOpertion,
-			str.contains(" ") ? Float.parseFloat(str.substring(str.lastIndexOf(" "), str.length())) : Float.parseFloat(str)
-		));
+		try {
+			historyOperation.add(new OperationWrapper(
+					lastOpertion,
+					str.contains(" ") ? Float.parseFloat(str.substring(str.lastIndexOf(" "), str.length())) : Float.parseFloat(str)
+			));
+		} catch (Exception ex) {
+			//best of the best code lol
+		}
+
 		Log.d(TAG,  "buffer = " + historyOperation.toString());
 	}
 }
