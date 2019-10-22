@@ -1,5 +1,7 @@
 package com.madnessofcorner.anothercalculator.ui.home;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,11 +15,13 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.madnessofcorner.anothercalculator.R;
+import com.udojava.evalex.Expression;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 	private static final String TAG = "MAIN_SCREEN";
@@ -45,8 +49,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 	private Button btnEquals;
 	private Button btnClear;
 
-	private Operaion lastOpertion = Operaion.EQUALS;
-	private ArrayList<OperationWrapper> historyOperation = new ArrayList<>();
+	private Button btnOpenBr;
+	private Button btnCloseBr;
+
+	private Button btnCorrection;
+
+	private Button btnPi;
+	private Button btnExp;
+
+	private Button btnPercentage;
+
+
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -64,7 +77,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 			@Override
 			public void afterTextChanged(Editable editable) {
-				doCalculate(etWorkSpace.getText().toString());
+				doCalculateLib(etWorkSpace.getText().toString());
 			}
 		});
 		etResult = root.findViewById(R.id.et_result);
@@ -88,6 +101,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		btnEquals = root.findViewById(R.id.btn_equals);
 		btnClear = root.findViewById(R.id.btn_clear);
 
+		btnOpenBr = root.findViewById(R.id.btn_open_br);
+		btnCloseBr = root.findViewById(R.id.btn_close_br);
+
+		btnCorrection = root.findViewById(R.id.btn_correction);
+
+		btnPi = root.findViewById(R.id.btn_pi);
+		btnExp = root.findViewById(R.id.btn_exp);
+		btnPercentage = root.findViewById(R.id.btn_percentage);
+
 		btn0.setOnClickListener(this);
 		btn1.setOnClickListener(this);
 		btn2.setOnClickListener(this);
@@ -106,6 +128,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		btnDiv.setOnClickListener(this);
 		btnEquals.setOnClickListener(this);
 		btnClear.setOnClickListener(this);
+		btnCorrection.setOnClickListener(this);
+
+		btnPi.setOnClickListener(this);
+		btnExp.setOnClickListener(this);
+		btnOpenBr.setOnClickListener(this);
+		btnCloseBr.setOnClickListener(this);
+		btnPercentage.setOnClickListener(this);
+
+
 
 		return root;
 	}
@@ -158,131 +189,98 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 				etWorkSpace.setText(etWorkSpace.getText() + ".");
 				break;
 			}
+			case R.id.btn_open_br: {
+				etWorkSpace.setText(etWorkSpace.getText() + "(");
+				break;
+			}
+			case R.id.btn_close_br: {
+				etWorkSpace.setText(etWorkSpace.getText() + ")");
+				break;
+			}
 			case R.id.btn_add: {
-				doFillHistoryOperation(etWorkSpace.getText().toString());
-				lastOpertion = Operaion.ADD;
-				etWorkSpace.setText(etWorkSpace.getText() + " + ");
+				etWorkSpace.setText(etWorkSpace.getText() + "+");
 				break;
 			}
 			case R.id.btn_minus: {
-				doFillHistoryOperation(etWorkSpace.getText().toString());
-				lastOpertion = Operaion.MINUS;
-				etWorkSpace.setText(etWorkSpace.getText() + " - ");
+				etWorkSpace.setText(etWorkSpace.getText() + "-");
 				break;
 			}
 			case R.id.btn_division : {
-				doFillHistoryOperation(etWorkSpace.getText().toString());
-				lastOpertion = Operaion.DIVISION;
-				etWorkSpace.setText(etWorkSpace.getText() + " / ");
+				etWorkSpace.setText(etWorkSpace.getText() + "/");
 				break;
 			}
 			case R.id.btn_mul: {
-				doFillHistoryOperation(etWorkSpace.getText().toString());
-				lastOpertion = Operaion.MULTIPLICATION;
-				etWorkSpace.setText(etWorkSpace.getText() + " * ");
+				etWorkSpace.setText(etWorkSpace.getText() + "*");
 				break;
 			}
 			case R.id.btn_equals: {
-				doFillHistoryOperation(etWorkSpace.getText().toString());
-				lastOpertion = Operaion.EQUALS;
-				doCalculate(etWorkSpace.getText().toString());
+				doCalculateLib(etWorkSpace.getText().toString());
 				break;
 			}
 			case R.id.btn_correction: {
-				historyOperation.clear();
-				etWorkSpace.setText("");
+				if (
+					(etWorkSpace.getText().toString().indexOf("\uD835\uDED1") != -1 &&
+					etWorkSpace.getText().toString().indexOf("\uD835\uDED1") == etWorkSpace.getText().toString().length() - 2) ||
+					(etWorkSpace.getText().toString().indexOf("\uD835\uDC1E") != -1 &&
+					etWorkSpace.getText().toString().indexOf("\uD835\uDC1E") == etWorkSpace.getText().toString().length() - 2)
+				) {
+					etWorkSpace.setText(etWorkSpace.getText().toString().substring(0, etWorkSpace.getText().toString().length() - 2));
+				} else {
+					etWorkSpace.setText(etWorkSpace.getText().toString().substring(0, etWorkSpace.getText().toString().length() - 1));
+				}
 				break;
 			}
 			case R.id.btn_clear: {
-				historyOperation.clear();
 				etWorkSpace.setText("");
+				break;
+			}
+			case R.id.btn_pi: {
+				etWorkSpace.setText(etWorkSpace.getText() + "\uD835\uDED1");
+				break;
+			}
+			case R.id.btn_exp: {
+				etWorkSpace.setText(etWorkSpace.getText() + "\uD835\uDC1E");
+				break;
+			}
+
+			case R.id.btn_percentage: {
+				etWorkSpace.setText(etWorkSpace.getText() + "%");
 				break;
 			}
 		}
 	}
 
-	enum Operaion{
-		ADD,
-		MINUS,
-		EQUALS,
-		MULTIPLICATION,
-		DIVISION
-	}
-	public class OperationWrapper {
-		Operaion op;
-		Float value;
-		public OperationWrapper(Operaion op, Float value){
-			this.op = op;
-			this.value = value;
-		}
-		@Override
-		public String toString(){ //for debug!
-			return "Operation = " + this.op + " Value = " + this.value;
-		}
-	}
-	private void doCalculate(String str) {
-		if (historyOperation.size() == 0) {
-			etResult.setText(str);
+	private void doCalculateLib(String str) {
+		ArrayList<Character> allowedOperation = new ArrayList<Character> () {{ add('+'); add('-'); add('*'); add('/'); add('('); add(')');}};
+		char[] charArray = str.toCharArray();
+		if (str.isEmpty() || allowedOperation.contains(charArray[charArray.length - 1])) {
+			if (str.isEmpty()) etResult.setText("");
 			return;
 		}
-
-		Float buffer = 0.0f;
-		if (historyOperation.get(0).op == Operaion.EQUALS) {
-			buffer = historyOperation.get(0).value;
+		if (str.contains("(") && !str.contains(")")) {
+			str += ")";
+		}
+		if (str.contains("\uD835\uDED1")) {
+			str = str.replace("\uD835\uDED1", "3.14159265359");
+		}
+		if (str.contains("\uD835\uDC1E")) {
+			str = str.replace("\uD835\uDC1E", "2.71828182846");
+		}
+		if (str.contains("%")) {
+			str = str.replace("%", "/100");
 		}
 
-		for (int i = 0; i < historyOperation.size(); i++) {
-			if (
-					historyOperation.get(i).op == Operaion.MULTIPLICATION &&
-					historyOperation.get(i - 1).op != Operaion.MULTIPLICATION &&
-					historyOperation.get(i - 1).op != Operaion.DIVISION &&
-					historyOperation.get(i - 1).op != Operaion.EQUALS
-			) {
-				historyOperation.get(i - 1).value = historyOperation.get(i - 1).value * historyOperation.get(i).value;
-			} else if (
-					historyOperation.get(i).op == Operaion.DIVISION &&
-					historyOperation.get(i - 1).op != Operaion.MULTIPLICATION &&
-					historyOperation.get(i - 1).op != Operaion.DIVISION &&
-					historyOperation.get(i - 1).op != Operaion.EQUALS
-			) {
-				historyOperation.get(i - 1).value = historyOperation.get(i - 1).value / historyOperation.get(i).value;
-			} else {
-				if (historyOperation.get(i).op == Operaion.MULTIPLICATION) {
-					buffer *= historyOperation.get(i).value;
-				}
-				if (historyOperation.get(i).op == Operaion.DIVISION) {
-					buffer = buffer / historyOperation.get(i).value;
-				}
-			}
-		}
-		for (OperationWrapper item: historyOperation) {
-			if (item.op == Operaion.ADD) {
-				buffer += item.value;
-			}
-			if (item.op == Operaion.MINUS) {
-				buffer -= item.value;
-			}
-		}
-
-		etResult.setText("" + buffer);
-	}
-
-	private void doFillHistoryOperation(final String str) {
-
-		HashMap<Operaion, String> hashMap = new HashMap<Operaion, String> ();
-		hashMap.put(
-				lastOpertion,
-				str.contains(" ") ? str.substring(str.lastIndexOf(" "), str.length()) : str
-		);
+		BigDecimal result = null;
+		Log.d(TAG,"string test = " + str);
+		Expression expression = new Expression(str);
 		try {
-			historyOperation.add(new OperationWrapper(
-					lastOpertion,
-					str.contains(" ") ? Float.parseFloat(str.substring(str.lastIndexOf(" "), str.length())) : Float.parseFloat(str)
-			));
+			result = expression.eval();
+			expression.setPrecision(2);
 		} catch (Exception ex) {
-			//best of the best code lol
+			Snackbar.make(getView(), ex.getMessage(), Snackbar.LENGTH_SHORT).show();
+			etResult.setText(ex.getMessage());
+			return;
 		}
-
-		Log.d(TAG,  "buffer = " + historyOperation.toString());
+		etResult.setText("" + result);
 	}
 }
