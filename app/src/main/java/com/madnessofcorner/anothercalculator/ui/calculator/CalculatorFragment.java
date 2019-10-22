@@ -1,7 +1,5 @@
-package com.madnessofcorner.anothercalculator.ui.home;
+package com.madnessofcorner.anothercalculator.ui.calculator;
 
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,9 +19,10 @@ import com.udojava.evalex.Expression;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 
 
-public class HomeFragment extends Fragment implements View.OnClickListener {
+public class CalculatorFragment extends Fragment implements View.OnClickListener {
 	private static final String TAG = "MAIN_SCREEN";
 
 	private EditText etWorkSpace;
@@ -58,12 +57,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 	private Button btnExp;
 
 	private Button btnPercentage;
+	private Button btnFact;
+	private Button btnLog;
+	private Button btnSquareRoot;
+	private Button btnSquare;
 
 
+	private Button btnDeg;
+	private Button btnSin;
+	private Button btnCos;
+	private Button btnTan;
+	private Button btnRad;
 
-	public View onCreateView(@NonNull LayoutInflater inflater,
-							 ViewGroup container, Bundle savedInstanceState) {
-		View root = inflater.inflate(R.layout.fragment_home, container, false);
+	private final String[] deletedOperation = {"COS(", "SIN(", "FACT(", "LOG(", "RAD(", "DEG(", "PI", "SQRT(", "TAN("};
+
+	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View root = inflater.inflate(R.layout.fragment_calculator, container, false);
 		etWorkSpace = root.findViewById(R.id.et_workspace);
 		etWorkSpace.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -109,6 +118,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		btnPi = root.findViewById(R.id.btn_pi);
 		btnExp = root.findViewById(R.id.btn_exp);
 		btnPercentage = root.findViewById(R.id.btn_percentage);
+		btnFact = root.findViewById(R.id.btn_fact);
+		btnLog = root.findViewById(R.id.btn_log);
+		btnSquareRoot = root.findViewById(R.id.btn_square_root);
+		btnSquare = root.findViewById(R.id.btn_square);
+
+		btnDeg = root.findViewById(R.id.btn_deg);
+		btnSin = root.findViewById(R.id.btn_sin);
+		btnCos = root.findViewById(R.id.btn_cos);
+		btnTan = root.findViewById(R.id.btn_tan);
+		btnRad = root.findViewById(R.id.btn_rad);
 
 		btn0.setOnClickListener(this);
 		btn1.setOnClickListener(this);
@@ -135,8 +154,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		btnOpenBr.setOnClickListener(this);
 		btnCloseBr.setOnClickListener(this);
 		btnPercentage.setOnClickListener(this);
+		btnFact.setOnClickListener(this);
+		btnLog.setOnClickListener(this);
+		btnSquareRoot.setOnClickListener(this);
+		btnSquare.setOnClickListener(this);
 
-
+		btnDeg.setOnClickListener(this);
+		btnSin.setOnClickListener(this);
+		btnCos.setOnClickListener(this);
+		btnTan.setOnClickListener(this);
+		btnRad.setOnClickListener(this);
 
 		return root;
 	}
@@ -215,17 +242,27 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 			}
 			case R.id.btn_equals: {
 				doCalculateLib(etWorkSpace.getText().toString());
+				doSaveHistory();
+				etWorkSpace.setText(etResult.getText());
 				break;
 			}
 			case R.id.btn_correction: {
-				if (
-					(etWorkSpace.getText().toString().indexOf("\uD835\uDED1") != -1 &&
-					etWorkSpace.getText().toString().indexOf("\uD835\uDED1") == etWorkSpace.getText().toString().length() - 2) ||
-					(etWorkSpace.getText().toString().indexOf("\uD835\uDC1E") != -1 &&
-					etWorkSpace.getText().toString().indexOf("\uD835\uDC1E") == etWorkSpace.getText().toString().length() - 2)
-				) {
-					etWorkSpace.setText(etWorkSpace.getText().toString().substring(0, etWorkSpace.getText().toString().length() - 2));
-				} else {
+				if (etWorkSpace.getText().toString().isEmpty()) {
+					break;
+				}
+				boolean isLastOperation = false;
+				for (String operation: deletedOperation) {
+					if (
+						etWorkSpace.getText().toString().indexOf(operation) != -1 &&
+						etWorkSpace.getText().toString().indexOf(operation) == (etWorkSpace.getText().toString().length() - operation.length())
+					) {
+						etWorkSpace.setText(etWorkSpace.getText().toString().substring(0, etWorkSpace.getText().toString().length() - operation.length()));
+						isLastOperation = true;
+						break;
+					}
+				}
+
+				if (!isLastOperation) {
 					etWorkSpace.setText(etWorkSpace.getText().toString().substring(0, etWorkSpace.getText().toString().length() - 1));
 				}
 				break;
@@ -235,11 +272,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 				break;
 			}
 			case R.id.btn_pi: {
-				etWorkSpace.setText(etWorkSpace.getText() + "\uD835\uDED1");
+				etWorkSpace.setText(etWorkSpace.getText() + "PI");
 				break;
 			}
 			case R.id.btn_exp: {
-				etWorkSpace.setText(etWorkSpace.getText() + "\uD835\uDC1E");
+				etWorkSpace.setText(etWorkSpace.getText() + "e");
 				break;
 			}
 
@@ -247,11 +284,59 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 				etWorkSpace.setText(etWorkSpace.getText() + "%");
 				break;
 			}
+			case R.id.btn_fact: {
+				etWorkSpace.setText(etWorkSpace.getText() + "FACT(");
+				break;
+			}
+			case R.id.btn_log: {
+				etWorkSpace.setText(etWorkSpace.getText() + "LOG(");
+				break;
+			}
+			case R.id.btn_square_root: {
+				etWorkSpace.setText(etWorkSpace.getText() + "SQRT(");
+				break;
+			}
+			case R.id.btn_square: {
+				etWorkSpace.setText(etWorkSpace.getText() + "^");
+				break;
+			}
+
+			case R.id.btn_sin: {
+				etWorkSpace.setText(etWorkSpace.getText() + "SIN(");
+				break;
+			}
+			case R.id.btn_cos: {
+				etWorkSpace.setText(etWorkSpace.getText() + "COS(");
+				break;
+			}
+			case R.id.btn_tan: {
+				etWorkSpace.setText(etWorkSpace.getText() + "TAN(");
+				break;
+			}
+			case R.id.btn_rad: {
+				etWorkSpace.setText(etWorkSpace.getText() + "RAD(");
+				break;
+			}
+			case R.id.btn_deg: {
+				etWorkSpace.setText(etWorkSpace.getText() + "DEG(");
+				break;
+			}
 		}
 	}
 
+	private void doSaveHistory() {
+		String historyItem = new Date().toString() + ":\n";
+		historyItem += etWorkSpace.getText() + " = " + etResult.getText();
+
+/*		SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+		SharedPreferences.Editor prefEdit = prefs.edit();
+		prefEdit.putString("history", historyItem);
+		prefEdit.commit();*/
+		Log.d(TAG, "save history = " + historyItem);
+	}
+
 	private void doCalculateLib(String str) {
-		ArrayList<Character> allowedOperation = new ArrayList<Character> () {{ add('+'); add('-'); add('*'); add('/'); add('('); add(')');}};
+		ArrayList<Character> allowedOperation = new ArrayList<Character> () {{ add('+'); add('-'); add('*'); add('/'); add('('); add(')'); add('^');}};
 		char[] charArray = str.toCharArray();
 		if (str.isEmpty() || allowedOperation.contains(charArray[charArray.length - 1])) {
 			if (str.isEmpty()) etResult.setText("");
@@ -259,12 +344,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 		}
 		if (str.contains("(") && !str.contains(")")) {
 			str += ")";
-		}
-		if (str.contains("\uD835\uDED1")) {
-			str = str.replace("\uD835\uDED1", "3.14159265359");
-		}
-		if (str.contains("\uD835\uDC1E")) {
-			str = str.replace("\uD835\uDC1E", "2.71828182846");
 		}
 		if (str.contains("%")) {
 			str = str.replace("%", "/100");

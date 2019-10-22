@@ -3,41 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_pro">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.madnessofcorner.anothercalculator.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_simple"
+        android:name="com.madnessofcorner.anothercalculator.ui.simple.GalleryFragment"
+        android:label="@string/menu_simple"
+        tools:layout="@layout/fragment_simple" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.madnessofcorner.anothercalculator.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_pro"
+        android:name="com.madnessofcorner.anothercalculator.ui.calculator.CalculatorFragment"
+        android:label="@string/menu_pro"
+        tools:layout="@layout/fragment_calculator" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.madnessofcorner.anothercalculator.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_history"
+        android:name="com.madnessofcorner.anothercalculator.ui.history.HistoryFragment"
+        android:label="@string/menu_history"
+        tools:layout="@layout/fragment_history" />
 
-    <fragment
-        android:id="@+id/nav_tools"
-        android:name="com.madnessofcorner.anothercalculator.ui.tools.ToolsFragment"
-        android:label="@string/menu_tools"
-        tools:layout="@layout/fragment_tools" />
-
-    <fragment
-        android:id="@+id/nav_share"
-        android:name="com.madnessofcorner.anothercalculator.ui.share.ShareFragment"
-        android:label="@string/menu_share"
-        tools:layout="@layout/fragment_share" />
-
-    <fragment
-        android:id="@+id/nav_send"
-        android:name="com.madnessofcorner.anothercalculator.ui.send.SendFragment"
-        android:label="@string/menu_send"
-        tools:layout="@layout/fragment_send" />
 </navigation>

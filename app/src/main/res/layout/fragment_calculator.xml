@@ -52,10 +52,10 @@
             android:background="@color/colorPrimary">
 
             <Button
-                android:id="@+id/btn_inv"
+                android:id="@+id/btn_deg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="INV"
+                android:text="DEG"
                 />
             <Button
                 android:id="@+id/btn_rad"
@@ -95,10 +95,10 @@
                 android:text="%"
                 />
             <Button
-                android:id="@+id/btn_ln"
+                android:id="@+id/btn_fact"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="㏑" />
+                android:text="FACT" />
 
             <Button
                 android:id="@+id/btn_log"
@@ -317,6 +317,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_end="64dp" />
+        app:layout_constraintGuide_end="16dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
