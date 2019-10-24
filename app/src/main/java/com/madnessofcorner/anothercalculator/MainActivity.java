@@ -1,32 +1,34 @@
 package com.madnessofcorner.anothercalculator;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.udojava.evalex.Expression;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 	private static final String TAG = "MAIN_SCREEN";
+	private static final int LIMIT_HISTRY_STORAGE = 20;
 
 	private EditText etWorkSpace;
-	private EditText etResult;
+	private TextView etResult;
 
 	private Button btn0;
 	private Button btn1;
@@ -68,9 +70,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private Button btnTan;
 	private Button btnRad;
 
+	private TextView tvHistory;
 	private final String[] deletedOperation = {"COS(", "SIN(", "FACT(", "LOG(", "RAD(", "DEG(", "PI", "SQRT(", "TAN("};
+	private final String[] operationsForReplace = {
+            "+", "-", "*", "/", "^", "."
+	};
+    ArrayList<Character> allowedOperation = new ArrayList<Character> () {{ add('+'); add('-'); add('*'); add('/'); add('('); add(')'); add('^');}};
 
-	FragmentTransaction mFragmentTransaction;
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -92,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				doCalculateLib(etWorkSpace.getText().toString());
 			}
 		});
-		etResult = findViewById(R.id.et_result);
+		etResult = findViewById(R.id.tv_result);
 
 		btn0 = findViewById(R.id.button0);
 		btn1 = findViewById(R.id.button1);
@@ -132,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btnTan = findViewById(R.id.btn_tan);
 		btnRad = findViewById(R.id.btn_rad);
 
+		tvHistory = findViewById(R.id.tv_history);
+		tvHistory.setText(getHistory());
+        tvHistory.setMovementMethod(new ScrollingMovementMethod());
 		btn0.setOnClickListener(this);
 		btn1.setOnClickListener(this);
 		btn2.setOnClickListener(this);
@@ -174,6 +183,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 	@Override
 	public void onClick(View view) {
+        // Get instance of Vibrator from current Context
+        Vibrator v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+        v.vibrate(50);
 		switch (view.getId()) {
 			case R.id.button0 : {
 				etWorkSpace.setText(etWorkSpace.getText() + "0");
@@ -335,19 +347,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	private void doSaveHistory() {
-		String historyItem = new Date().toString() + ":\n";
-		historyItem += etWorkSpace.getText() + " = " + etResult.getText();
+		String historyItem = etWorkSpace.getText() + " = " + etResult.getText() + "\n";
 
-/*		SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+		if (tvHistory.getLineCount() > LIMIT_HISTRY_STORAGE) {
+		    String[] tempArray = tvHistory.getText().toString().split("\n");
+		    String tempString = "";
+		    for(int i = 1; i < LIMIT_HISTRY_STORAGE; i++){
+                tempString += tempArray[i] + "\n";
+            }
+            tvHistory.setText(tempString + historyItem);
+        } else {
+            tvHistory.setText(tvHistory.getText() + historyItem);
+        }
+		SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 		SharedPreferences.Editor prefEdit = prefs.edit();
-		prefEdit.putString("history", historyItem + gethistory());
-		prefEdit.commit();*/
-		Log.d(TAG, "save history = " + historyItem);
+		prefEdit.putString("history", tvHistory.getText().toString());
+		prefEdit.commit();
+	}
+
+	private String getHistory() {
+		SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+		return prefs.getString("history", "");
 	}
 
 	private void doCalculateLib(String str) {
-		ArrayList<Character> allowedOperation = new ArrayList<Character> () {{ add('+'); add('-'); add('*'); add('/'); add('('); add(')'); add('^');}};
+
 		char[] charArray = str.toCharArray();
+        for (String operation: operationsForReplace) {
+            if (
+                    str.lastIndexOf(operation) != -1 && str.lastIndexOf(operation) == (str.length() - operation.length())
+            ) {
+                for (String operation2: operationsForReplace){
+                    if (str.substring(0, str.lastIndexOf(operation)).indexOf(operation2) != -1 &&
+                            str.substring(0, str.lastIndexOf(operation)).indexOf(operation2)  == (str.substring(0, str.lastIndexOf(operation)).length() - operation2.length())
+                    ) {
+                        if (operation2.equals(operation)) {
+                            str = str.substring(0, str.lastIndexOf(operation));
+                            etWorkSpace.setText(str);
+                        } else {
+                            String newOperation = str.substring(str.lastIndexOf(operation));
+                            str = str.substring(0, str.lastIndexOf(operation2)) + newOperation;
+                            etWorkSpace.setText(str);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
 		if (str.isEmpty() || allowedOperation.contains(charArray[charArray.length - 1])) {
 			if (str.isEmpty()) etResult.setText("");
 			return;
@@ -358,9 +405,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		if (str.contains("%")) {
 			str = str.replace("%", "/100");
 		}
-
 		BigDecimal result = null;
-		Log.d(TAG,"string test = " + str);
 		Expression expression = new Expression(str);
 		try {
 			result = expression.eval();
@@ -370,6 +415,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			etResult.setText(ex.getMessage());
 			return;
 		}
-		etResult.setText("" + result);
+		etResult.setText(result.toEngineeringString());
 	}
 }
